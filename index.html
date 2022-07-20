@@ -1,35 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
     <style>
         #map {
-    width: 1000px;
-    height: 600px;
-}
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
     </style>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0/leaflet.css" />
 </head>
 <body>
     <div id="map"></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0/leaflet.js"></script>
 </body>
 <script>
-    let tiles = new L.tileLayer('https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png', {
-  detectRetina: true,
-  maxZoom: 18,
-  minZoom: 11,
-  //Do not remove this attribution
-  attribution: '<img src="https://docs.onemap.sg/maps/images/oneMap64-01.png" style="height:20px;width:20px;">' +
+  let tiles = new L.tileLayer('https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png', {
+   detectRetina: true,
+   maxZoom: 18,
+   minZoom: 11,
+   //Do not remove this attribution
+   attribution: '<img src="https://docs.onemap.sg/maps/images/oneMap64-01.png" style="height:20px;width:20px;">' +
                'New OneMap | Map data © contributors, <a href="http://SLA.gov.sg">Singapore Land Authority</a>'
-});
-let map = new L.Map("map", {
-    center: [1.347833, 103.809357], 
-    zoom: 11,
-    maxBounds: L.latLngBounds(L.latLng(1.1, 103.5), L.latLng(1.5, 104.3))
-    })
-    .addLayer(tiles);
+ });
+           let map = new L.Map("map", {
+            center: [1.347833, 103.809357], 
+            zoom: 11,
+            maxBounds: L.latLngBounds(L.latLng(1.1, 103.5), L.latLng(1.5, 104.3))
+            })
+     .addLayer(tiles);
 
-    
+   fetch('https://api.data.gov.sg/v1/environment/psi')
+       .then(response => response.json())
+       .then(function (data) {
+           console.log(data)
+
+           var metadata = data.region_metadata;
+           
+           var psi = data.items[0].readings.psi_twenty_four_hourly;
+
+           var west_circle = L.circleMarker([metadata[0].label_location.latitude, metadata[0].label_location.longitude], 
+           { radius: psi.west})
+               .bindTooltip(`${psi.west}`,
+                   {
+                       permanent: true,
+                       direction: 'right'
+                   }).addTo(map)
+
+           var east_circle = L.circleMarker([metadata[2].label_location.latitude, metadata[2].label_location.longitude], 
+           { radius: psi.east })
+               .bindTooltip(`${psi.east}`,
+                   {
+                       permanent: true,
+                       direction: 'right'
+                   }).addTo(map)
+
+           var central_circle = L.circleMarker([metadata[3].label_location.latitude, metadata[3].label_location.longitude], 
+           { radius: psi.central })
+               .bindTooltip(`${psi.central}`,
+                   {
+                       permanent: true,
+                       direction: 'right'
+                   }).addTo(map)
+
+           
+           var south_circle = L.circleMarker([metadata[4].label_location.latitude, metadata[4].label_location.longitude], 
+           { radius: psi.south })
+               .bindTooltip(`${psi.south}`,
+                   {
+                       permanent: true,
+                       direction: 'right'
+                   }).addTo(map)
+
+           var north_circle = L.circleMarker([metadata[5].label_location.latitude, metadata[5].label_location.longitude], 
+           { radius: psi.north })
+               .bindTooltip(`${psi.north}`,
+                   {
+                       permanent: true,
+                       direction: 'right'
+                   }).addTo(map)
+
+           
+
+       })
+
 </script>
 </html>
